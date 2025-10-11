@@ -24,9 +24,9 @@ def optimize_qaoa(N : int, G : np.ndarray) -> dict:
 
 
 
-def solver(num_node: int , num_degree: int, number: int):
-    file_name = str(num_node) + "_node_" + str(num_degree) + "_degree/" + str(number)
-    json_open = open('../in/' + file_name + 'in.json','r')
+def solver(num_node: int , number: int):
+    file_name = str(num_node) + "/" + str(number)
+    json_open = open('in/' + file_name + 'in.json','r')
     json_load = json.load(json_open)
     #print(json_load)
     G = nx.readwrite.json_graph.adjacency_graph(json_load)
@@ -39,6 +39,5 @@ def solver(num_node: int , num_degree: int, number: int):
 if __name__ == "__main__":
     
     for num_node in range(8,9):
-        for num_degree in range(5,6):
             for number in range(1):
-                solver(num_node,num_degree,number)
+                solver(num_node,number)

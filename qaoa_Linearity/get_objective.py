@@ -55,7 +55,7 @@ def cal_cost(N: int, G: nx.Graph,count) -> float:
 
 
 def get_objective(theta: np.ndarray, N : int,G: nx.graph) -> float:
-    p = len(theta)/2
+    p = int(len(theta)/2)
     beta = theta[:p]
     gamma = theta[p:]
     qc = get_qaoa_circuit(N,G,beta,gamma)
