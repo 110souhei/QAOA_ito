@@ -10,13 +10,16 @@ import networkx as nx
 import get_objective as go
 
 
+trajectory = []
+def record_path(xk):
+    trajectory.append(np.copy(xk))
 
 def optimize_qaoa(N : int, G : np.ndarray) -> dict:
     OPTIONS = {"maxiter" : 10000, "disp" : False}
     ARGS = (N,G)
     betagamma = np.zeros(4*2)
     
-    result = minimize(go.get_objective,x0 =  betagamma, method= "Nelder-Mead", args = ARGS, options = OPTIONS, tol = 1e-4)
+    result = minimize(go.get_objective,x0 =  betagamma, method= "Nelder-Mead", args = ARGS, options = OPTIONS, tol = 1e-4,callback=record_path)
     d = {}
     d['ans'] = -result.fun
     d['nfev'] = result.nfev
@@ -41,3 +44,4 @@ if __name__ == "__main__":
     for num_node in range(8,9):
             for number in range(1):
                 solver(num_node,number)
+    print(trajectory)
