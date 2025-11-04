@@ -9,29 +9,9 @@ import json
 import networkx as nx
 import get_objective as go
 import math
-
 from sklearn.decomposition import PCA
-X = np.array([[-1,-1],[-2,-1],[-3,-2],[1,1],[2,1],[3,2]])
-pca = PCA(n_components=1)
-pca.fit(X) #PCAをしている
-print(pca.components_) #分析した主成分を出している。
-print(pca.explained_variance_ratio_)#説明される分散の割合
-print(pca.singular_values_)#特異値
-print(pca.explained_variance_)#固有値(どのくらい説明できたか)
-print(pca.get_covariance())
-a = pca.transform([[-1,0]])
-print(a)
-print(pca.inverse_transform(a))
 
 
-
-
-
-
-#最適化経路を記録する関数
-def record_path(xk):
-    trajectory[trajectory_size] = xk
-    trajectory_size += 1
 
 
 #評価関数
@@ -64,12 +44,18 @@ def optimize_qaoa(N : int, G : np.ndarray) -> dict:
 
 
     #最適化経路を保存する 
-    global trajectory, trajectory_size
     trajectory = np.zeros((100000,Parameters),dtype = float)
+    trajectory_size = 0
+    #最適化経路を保存するローカル関数
+    def record_path(xk):
+        nonlocal trajectory, trajectory_size
+        print(xk)
+        trajectory[trajectory_size] = xk
+        trajectory_size += 1
 
-    # betagamma = np.random.uniform(0, np.pi, 8)
-    betagamma = np.zeros(Parameters,dtype = float) #初期値を固定
-
+    betagamma = np.random.uniform(0, np.pi, Parameters)
+    #betagamma = np.zeros(Parameters,dtype = float) #初期値を固定
+    print(betagamma)
 
 
     #Step1
@@ -81,12 +67,24 @@ def optimize_qaoa(N : int, G : np.ndarray) -> dict:
     Record['nfev-p1'] = int(result.nfev)
     Record['ans-p1'] = float(result.fun)
 
+    print(Record['nfev-p1'])
+    print(Record['ans-p1'])
     #Step2
     OPTIONS = {"maxiter" : 5000, "disp" : False}
-    pca = PCA(trajectory) #最適化経路をPCAを使って分析
-    betagamma = pca.explained_variance_ #初期パラメータとして主成分の固有値を返す。
+    print("aaaaa")
+    pca = PCA(n_components=Parameters_PCA) #使用する主成分の本数を決定
+    trajectory_sub = trajectory[:trajectory_size] #最適化経路分だけ取り出す
+    print(trajectory)
+    print(trajectory_sub)
+    pca.fit(trajectory_sub) #最適化経路をPCAを使って分析
+    print(pca)
+    print("aaaa")
+
+    print(trajectory)
+    print(pca.explained_variance_)
+    betagamma = pca.explained_variance_ #初期パラメータとして主成分の固有値に設定する.
     ARGS = (N,G,pca) # 
-    result = minimize(get_objective_pca,x0 =  betagamma, method= Method_name, args = ARGS, options = OPTIONS, tol = TOL,callback=record_path)
+    result = minimize(get_objective_pca,x0 =  betagamma, method= Method_name, args = ARGS, options = OPTIONS, tol = TOL)
 
     #記録
     Record['nfev-p2'] = int(result.nfev)
@@ -97,7 +95,7 @@ def optimize_qaoa(N : int, G : np.ndarray) -> dict:
     OPTIONS = {"maxiter" : 5000, "disp" : False}
     ARGS = (N,G)
     betagamma = pca.inverse_transform(betagamma) #元の空間に戻す。
-    result = minimize(go.get_objective,x0 =  betagamma, method= Method_name, args = ARGS, options = OPTIONS, tol = TOL,callback=record_path)
+    result = minimize(go.get_objective,x0 =  betagamma, method= Method_name, args = ARGS, options = OPTIONS, tol = TOL)
     
     #記録
     Record['nfev-p3'] = int(result.nfev)
@@ -111,9 +109,8 @@ def solver(num_node: int , number: int):
     file_name = str(num_node) + "/" + str(number)
     json_open = open('in/' + file_name + 'in.json','r')
     json_load = json.load(json_open)
-    
-    
     G = nx.readwrite.json_graph.adjacency_graph(json_load)
+    
     res = optimize_qaoa(len(G.nodes),G)
     f = open('out/Nelder-pca/' + file_name + 'out.json','w') 
     json.dump(res,f,ensure_ascii=False)
@@ -121,7 +118,7 @@ def solver(num_node: int , number: int):
 
 if __name__ == "__main__":
     for num_node in range(8,9):
-            for number in range(100):
+            for number in range(1):
                 solver(num_node,number)
                 #print(number)
     #print(trajectory)
