@@ -8,8 +8,21 @@ import numpy as np
 import json
 import networkx as nx
 import get_objective as go
-import PCA as pc
 import math
+
+from sklearn.decomposition import PCA
+X = np.array([[-1,-1],[-2,-1],[-3,-2],[1,1],[2,1],[3,2]])
+pca = PCA(n_components=1)
+pca.fit(X) #PCAをしている
+print(pca.components_) #分析した主成分を出している。
+print(pca.explained_variance_ratio_)#説明される分散の割合
+print(pca.singular_values_)#特異値
+print(pca.explained_variance_)#固有値(どのくらい説明できたか)
+print(pca.get_covariance())
+a = pca.transform([[-1,0]])
+print(a)
+print(pca.inverse_transform(a))
+
 
 
 
@@ -18,8 +31,8 @@ trajectory = []
 def record_path(xk):
     trajectory.append(np.copy(xk))
 
-def get_objective_pca (theta: np.ndarray, N : int,G: nx.graph, P,means,m) -> float:
-    p = pc.inv(theta,P,means)
+def get_objective_pca (theta: np.ndarray, N : int,G: nx.graph, pca : PCA) -> float:
+    p = pca.inverse_transform([theta])
     p = int(len(theta)/2)
     beta = theta[:p]
     gamma = theta[p:]

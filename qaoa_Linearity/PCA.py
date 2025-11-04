@@ -132,3 +132,11 @@ def inv(y,p,means):
         x.append(means[i] + c)
 
     return x
+
+def pca_proter(means,p):
+
+    #地域については考察する必要がある
+
+    for i in range(200):
+        for j in range(200):
+            
