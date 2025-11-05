@@ -17,13 +17,21 @@ from sklearn.decomposition import PCA
 #評価関数
 def get_objective_pca (theta: np.ndarray, N : int,G: nx.graph, pca : PCA) -> float:
 
-    theta = pca.inverse_transform(theta.reshape(1,-1))[0] #パラメータを逆変換する
-    #print(theta)
-    p = int(len(theta)/2)
+    #theta = pca.inverse_transform(theta.reshape(1,-1))[0] #パラメータを逆変換する
+
+    p = int(len(pca.components_[0])/2) #元のパラメータ数
+
+    theta_ptbo = np.zeros(p*2)
+    
+    #theat_ptbo = PCAで分析した固有ベクトル * パラメータ(theta)
+    for pca_comp_number in range(len(pca.components_)): #何番目の固有ベクトル
+         for i in range(p*2): #元の空間のどこのパラメータか
+              theta_ptbo[i] += pca.components_[pca_comp_number][i] * theta[pca_comp_number]
 
 
-    beta = theta[:p]
-    gamma = theta[p:]
+
+    beta = theta_ptbo[:p]
+    gamma = theta_ptbo[p:]
     qc = PQC.get_qaoa_circuit(N,G,beta,gamma)
     sim = StatevectorSimulator()
     job = sim.run(qc)
