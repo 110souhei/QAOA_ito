@@ -20,6 +20,6 @@ def gen_graph(num_nodes : int, number : int):
 
 if __name__ == "__main__":
     
-    for num_nodes in range(8,9):
+    for num_nodes in range(9,21):
         for number in np.arange(0,300):
                 gen_graph(num_nodes,number)
