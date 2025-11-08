@@ -59,6 +59,7 @@ def optimize_qaoa(N : int, G : np.ndarray) -> dict:
     def record_path(theta_):
         #print(xk)
         nonlocal trajectory, trajectory_size
+        print(theta_)
         trajectory[trajectory_size] = theta_
         trajectory_size += 1
 
@@ -100,7 +101,17 @@ def optimize_qaoa(N : int, G : np.ndarray) -> dict:
     #Step3
     OPTIONS = {"maxiter" : 5000, "disp" : False}
     ARGS = (N,G)
-    betagamma = pca.inverse_transform(betagamma.reshape(1,-1))[0] #パラメータを逆変換する
+    
+    #betagamma = pca.inverse_transform(betagamma.reshape(1,-1))[0] #パラメータを逆変換する
+
+    
+    betagamma_ = np.zeros(Parameters) # 新しいbetagammaを用意(後で入れ替える)
+    for pca_comp_number in range(len(pca.components_)): #何番目の固有ベクトル
+         for i in range(Parameters): #元の空間のどこのパラメータか
+                betagamma_[i] += pca.components_[pca_comp_number][i] * betagamma[pca_comp_number]
+    betagamma = betagamma_ #最後に元の空間で探索する用のbetagamma
+
+
     result = minimize(PQC.get_objective,x0 =  betagamma, method= Method_name, args = ARGS, options = OPTIONS, tol = TOL)
     
     #記録

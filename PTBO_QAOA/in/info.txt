@@ -1,0 +1,6 @@
+random_i graph // 辺の生成率が0.iのグラフ
+regular_i graph // i正則のグラフ
+cycle // サイクルグラフ
+complete //完全グラフ
+
+それぞれフォルダの下に生成器を作ってください
