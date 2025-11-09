@@ -4,15 +4,15 @@ import json
 import networkx as nx
 
 if __name__ == "__main__":
-    out_file_name = "Neldermead_Parameters_20"
-    graph_file_name = "random/random_7/20"
+    out_file_name = "Neldermead_Parameters_6"
+    graph_file_name = "random/random_7/7"
 
     # QAOA設定
     qaoa_status = {
-        'Parameters': 20,  # QAOAのパラメータ数(量子回路の深さ*2)
+        'Parameters': 6,  # QAOAのパラメータ数(量子回路の深さ*2)
         'Method_name': "Nelder-Mead",  # 使用する最適化アルゴリズム
         'Tol': 1e-3,  # 収束精度
-        'betagamma': [0.5] * 20  # 初期値
+        'betagamma': [0.5] * 6  # 初期値
     }
 
     # 入力・出力のベースディレクトリ

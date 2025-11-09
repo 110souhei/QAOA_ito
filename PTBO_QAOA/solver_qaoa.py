@@ -8,15 +8,15 @@ import networkx as nx
 if __name__ == "__main__":
 
 
-    out_file_name = "Neldermead_Parameters_20"
-    graph_file_name = "random/random_7/20"
+    out_file_name = "Neldermead_Parameters_6"
+    graph_file_name = "random/random_7/7"
     qaoa_status = {}
-    qaoa_status['Parameters'] = 20 # QAOAのパラメータ数(量子回路の深さ*2)
+    qaoa_status['Parameters'] = 6 # QAOAのパラメータ数(量子回路の深さ*2)
     qaoa_status['Method_name'] = "Nelder-Mead" #使用する最適化アルゴリズム
     qaoa_status['Tol'] = 1e-3#収束精度
-    qaoa_status['betagamma'] = [0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5]
+    qaoa_status['betagamma'] = [0.5,0.5,0.5,0.5,0.5,0.5]#,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5]
 
-    for number in range(300):
+    for number in range(1):
     
 
 
@@ -28,6 +28,7 @@ if __name__ == "__main__":
         Record = qaoa.solver(G,qaoa_status) #グラフ、QAOAのステータスを渡す
 
         f = open('out/'+ out_file_name + "/" + graph_file_name + '/' + str(number) + 'out.json','w')
+        print(Record)
         json.dump(Record,f,ensure_ascii=False)
 
 

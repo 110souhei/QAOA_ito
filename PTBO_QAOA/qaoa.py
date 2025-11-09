@@ -62,3 +62,4 @@ def optimize_qaoa(N : int, G : np.ndarray, qaoa_status : dict) -> dict:
 def solver(G : nx, qaoa_status: dict) -> dict:
     print("start solve")
     Record = optimize_qaoa(len(G.nodes),G, qaoa_status) #結果をdictで受け取る
+    return Record
