@@ -39,17 +39,27 @@ def get_objective_pca (theta: np.ndarray, N : int,G: nx.graph, pca : PCA) -> flo
     cost = PQC.cal_cost(N,G,result)
     return -cost
 
-def optimize_qaoa(N : int, G : np.ndarray) -> dict:
+def optimize_qaoa(N : int, G : np.ndarray, qaoa_status) -> dict:
 
 
     Record = {} #記録を保存する
     #初期値,問題設定、
 
-    Parameters = 8 # QAOAのパラメータ(量子回路の深さ*2)
-    Parameters_PCA = 2 #PCAを使って次元を削減した後のパラメータ
-    Method_name = "Nelder-Mead" #使用する最適化アルゴリズム
-    TOL = 1e-3 #収束精度
-    Maxiter_Step1 = 200 #Step1の回数
+
+    #########################
+    Parameters = qaoa_status['Parameters'] # QAOAのパラメータ数(量子回路の深さ*2)
+    Method_name = qaoa_status['Method_name'] #使用する最適化アルゴリズム
+    TOL = qaoa_status['Tol'] #収束精度
+    betagamma = []
+    if qaoa_status['betagamma'][0] == -1: 
+        betagamma = np.random.uniform(0, np.pi, Parameters)
+    else:
+        betagamma = np.array(qaoa_status['betagamma'])
+
+    Parameters_PCA = qaoa_status['Parameter_PCA']
+    Maxiter_Step1 = qaoa_status['Maxiter_Step1'] 
+    #betagamma = np.zeros(Parameters,dtype = float) #初期値を固定
+    ########################
 
 
     #最適化経路を保存する 
@@ -76,8 +86,6 @@ def optimize_qaoa(N : int, G : np.ndarray) -> dict:
     Record['nfev-p1'] = int(result.nfev)
     Record['ans-p1'] = float(result.fun)
 
-    print(Record['nfev-p1'],trajectory_size)
-    print(Record['ans-p1'])
     #Step2
     OPTIONS = {"maxiter" : 5000, "disp" : False}
     pca = PCA(n_components=Parameters_PCA) #使用する主成分の本数を決定
@@ -94,8 +102,6 @@ def optimize_qaoa(N : int, G : np.ndarray) -> dict:
     #記録
     Record['nfev-p2'] = int(result.nfev)
     Record['ans-p2'] = float(result.fun)
-    print(Record['nfev-p2'])
-    print(Record['ans-p2'])
 
 
     #Step3
@@ -117,9 +123,7 @@ def optimize_qaoa(N : int, G : np.ndarray) -> dict:
     #記録
     Record['nfev-p3'] = int(result.nfev)
     Record['ans-p3'] = float(result.fun)
-    
-    print(Record['nfev-p3'])
-    print(Record['ans-p3'])
+    Record['trajectory'] = trajectory[:trajectory_size].tolist()
     return Record
 
 

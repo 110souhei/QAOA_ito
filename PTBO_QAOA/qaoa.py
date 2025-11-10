@@ -9,14 +9,20 @@ import json
 import networkx as nx
 import PQC  #パラメータ付量子回路
 import math
+import time
+
+#最大使用メモリの測定
+import psutil
+import threading
+import os
 
 
 
 
-
-def optimize_qaoa(N : int, G : np.ndarray, qaoa_status : dict) -> dict:
-
-
+def optimize_qaoa(N : int, G : nx, qaoa_status : dict) -> dict:
+    start_time = time.time() #全体の実行時間
+    PQC_time_sum = 0.0 #実行時間のうち量子回路の実行時間の総和
+    max_memory = 0 #最大のメモリ使用量 (量子回路を実行する際に確認する)
     Record = {} #計算記録を保存する
     #初期値,問題設定、
 
@@ -40,21 +46,54 @@ def optimize_qaoa(N : int, G : np.ndarray, qaoa_status : dict) -> dict:
     #最適化経路を保存するローカル関数
     def record_path(theta_):
         nonlocal trajectory, trajectory_size
-        print(theta_)
         trajectory[trajectory_size] = theta_
         trajectory_size += 1
+
+    #量子回路の実行時間を計測する用の関数(optimaizaの評価関数をこれにしてね)
+    def timed_objective(betagamma,N,G) -> float:
+        nonlocal PQC_time_sum, max_memory
+        start_PQC = time.time()
+        cost = PQC.get_objective(betagamma,N,G)
+        end_PQC = time.time()
+        PQC_time_sum += end_PQC - start_PQC
+        return cost
+    
+    #メモリの使用率を監視する関数(0.01秒ごとにメモリの値をとっている)
+    max_mem = 0
+    process = psutil.Process(os.getpid())
+    def monitor_mem(initial_time,event):
+        nonlocal max_mem
+        while not event.wait(0.01):
+            mem = process.memory_info().rss
+            if( max_mem < mem):
+                max_mem = mem
+ 
+    event = threading.Event()
+    initial_time = time.time()
+
+    moniter_mem_start = threading.Thread(target=monitor_mem,args=((start_time,event)))
+    moniter_mem_start.start()# メモリ使用量の測定開始
+
 
     #Step1
     OPTIONS = {"maxiter" : 100000, "disp" : False}
     ARGS = (N,G)
-    print("start optimize")
-    result = minimize(PQC.get_objective,x0 =  betagamma, method= Method_name, args = ARGS, options = OPTIONS, tol = TOL,callback=record_path)
+    #print("start optimize")
+    result = minimize(timed_objective,x0 =  betagamma, method= Method_name, args = ARGS, options = OPTIONS, tol = TOL,callback=record_path)
     
     #記録
     Record['nfev'] = int(result.nfev)
     Record['ans'] = float(result.fun)
-    Record['trajectory'] = trajectory.tolist()
+    Record['trajectory'] = trajectory[:trajectory_size].tolist()
+    
+    end_time = time.time()
+    Record['qaoa_time'] = end_time - start_time
+    Record['PQC_time'] = PQC_time_sum
 
+    #print(max_mem)
+    event.set() #メモリ計測の終了
+
+    Record['max_mem'] = max_mem
     return Record
 
 

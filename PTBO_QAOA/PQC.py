@@ -64,5 +64,5 @@ def get_objective(theta: np.ndarray, N : int,G: nx.graph) -> float:
     job = sim.run(qc)
     result = job.result().get_statevector()
     cost = cal_cost(N,G,result)
-    print(cost)
+    #print(cost)
     return -cost

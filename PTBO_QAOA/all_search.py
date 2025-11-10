@@ -2,22 +2,12 @@ import networkx as nx
 import json
 import numpy as np
 
-def get_graph(num_node : int, number : int) :
+def all_search(G : nx) :
     
-    d = {}
-    
-    # ランダムグラフの生成
-    #print(num_nodes,edge_prob,number)
-    #d = nx.readwrite.json_graph.adjacency_data(G)
-    file_name = str(num_node) + "/" + str(number)
-    json_open = open("in/" + file_name + "in.json",'r')
-    #print(file_name)
-    json_load = json.load(json_open)
-    #print(json_load)
-    G = nx.readwrite.json_graph.adjacency_graph(json_load)
+    result = {}  #結果の保存
     
     N = len(G.nodes)
-    
+    Max_cut_value = np.zeros(1<<(N)).tolist()
     max_res = 0
     for i in range((1<<N)):
         res = 0
@@ -27,15 +17,23 @@ def get_graph(num_node : int, number : int) :
         
         if(res > max_res):
             max_res = res
+        Max_cut_value[i] = res
     
-    json_write = open("out/ans/" + file_name + "out.json",'w')
-    d['ans'] = max_res
-    json.dump(d,json_write,ensure_ascii=False)
-    return
+    result['Max_cut_value'] = Max_cut_value
+    result['ans'] = max_res
+    
+    return result
 
 
 if __name__ == "__main__":
-    
-    for num_nodes in range(8,9):
-            for number in range(100):
-                get_graph(num_nodes,number)
+    #入力ファイル
+    input_file_name_list =  ["regular/regular_3/8","regular/regular_3/10","regular/regular_3/12","regular/regular_3/14","regular/regular_3/16","regular/regular_3/18"]
+    for input_file_name in input_file_name_list:
+        for i in range(300):
+            json_open = open("in/" + input_file_name + "/" +  str(i) + "in.json",'r')
+            print(input_file_name +'/'+ str(i))
+            json_load = json.load(json_open)
+            G = nx.readwrite.json_graph.adjacency_graph(json_load)
+            result = all_search(G)
+            json_write = open("out/all_search/" + input_file_name + "/" + str(i) + "out.json",'w')
+            json.dump(result,json_write,ensure_ascii=False)
