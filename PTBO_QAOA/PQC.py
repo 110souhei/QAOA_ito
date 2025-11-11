@@ -41,20 +41,23 @@ def get_qaoa_circuit(N : int, G : np.ndarray, beta: np.ndarray, gamma: np.ndarra
 #cost cal
 
 
-def cal_cost(N: int, G: nx.Graph,count) -> float:
+def cal_cost(N: int, G: nx.Graph,count, answer : list) -> float:
     res = 0.0
     #print(len(count))
     p = len(np.asarray(count))
     for i in range(p):
         t = (count[i].real ** 2 + count[i].imag**2)
         # print(i,t)
-        for a,b in G.edges:
-            if((i>>(a))&(1) != (i>>(b))&(1)):
-                res += t
+        #for a,b in G.edges:
+        #    if((i>>(a))&(1) != (i>>(b))&(1)):
+        #        res += t
+
+        # 答えを参照して高速化
+        res += t * answer[i]
     return res
 
 
-def get_objective(theta: np.ndarray, N : int,G: nx.graph) -> float:
+def get_objective(theta: np.ndarray, N : int,G: nx.graph, answer : list) -> float:
     p = int(len(theta)/2)
     beta = theta[:p]
     gamma = theta[p:]
@@ -63,6 +66,6 @@ def get_objective(theta: np.ndarray, N : int,G: nx.graph) -> float:
     sim = StatevectorSimulator()
     job = sim.run(qc)
     result = job.result().get_statevector()
-    cost = cal_cost(N,G,result)
+    cost = cal_cost(N,G,result,answer)
     #print(cost)
     return -cost
