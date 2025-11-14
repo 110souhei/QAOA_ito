@@ -1,0 +1,16 @@
+solver_qaoa_ptbo,solver_qaoaにそれぞれ、out_file_name, in_file_name, dictを設定して実行してください。
+結果の出力先は
+out/out_file_name/in_file_nameという形になります。
+出力先はあらかじめ作成してください.
+
+
+solver_qaoa_denger(チャッピー作)はファイルを自動で生成するので、共用サーバ等で動かすのは危ない。ファイル生成だけする機能もあるので、ローカルでファイル生成だけやったほうが良い。
+solver_qaoaは存在するファイルにだけ書き込むので、多分大丈夫
+
+Neldermead_Parameters_20
+qaoa_status = {
+        "Parameters" : 20
+        "Method_name" : "Nelder-Mead"
+        "Tol" : 1e-3
+        "betagamma" : [0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5]
+}
