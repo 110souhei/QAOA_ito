@@ -1,26 +1,46 @@
-import matplotlib.pyplot as plt
-import numpy as np
+import os
 import json
-import no_deg as nd
+import matplotlib.pyplot as plt
+
+def load_json_range(directory, start=0, end=300, target_key=None):
+    values = []
+
+    for i in range(start, end):
+        fname = os.path.join(directory, f"{i}out.json")
+        if not os.path.exists(fname):
+            print(f"Warning: {fname} not found, skipping.")
+            continue
+
+        with open(fname, "r") as f:
+            data = json.load(f)
+
+        if target_key not in data:
+            print(f"Warning: key '{target_key}' not in {fname}, skipping.")
+            continue
+
+        values.append(data[target_key])
+
+    return values
 
 
-def x_node(num_degree : int,opt : str):
-    
-    data = nd.deg_no_ans(num_degree,opt)
-    plt.boxplot(data, vert=True, patch_artist=True,labels=[8,9,10,11,12])
-
-    # グラフの装飾
-    plt.title(opt+ ' ' + str(num_degree) +  ' degree')
-    plt.ylabel('val/true_val')
-    plt.xlabel('nodes')
-    plt.ylim(0.5,1)
-    #plt.grid(axis='y', linestyle='--', alpha=0.7)
-
-    # 表示
+def plot_box(values, key_name):
+    plt.figure(figsize=(6, 4))
+    plt.boxplot(values)
+    plt.ylabel(key_name)
+    plt.title(f"Boxplot of '{key_name}'")
+    plt.grid(True)
     plt.show()
 
 
-if __name__ == "__main__":
-    x_node(7,'Nelder-Mead')
-    x_node(7,'CG')
-    x_node(7,'Powell')
+# -----------------------------
+# 使用例
+# -----------------------------
+directory = "../out/Neldermead_Parameters_2/regular/regular_3/10"
+target_key = "nfev"   # ← ここをプロットしたいキー名に変える
+
+values = load_json_range(directory, start=0, end=300, target_key=target_key)
+
+if values:
+    plot_box(values, target_key)
+else:
+    print("No valid data found.")
